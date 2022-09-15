@@ -36,12 +36,26 @@ namespace NeuralNetwork_1
             return layer_output;
         }
 
-
-        public void UpdateAllGradients(DataPoint dataPoint)
+        public static double GetAverageCost(double[] output, double[] expectedOutput)
+        {
+            double cost = 0;
+            for (int i = 0; i < output.Length; i++)
+            {
+                double error = output[i] - expectedOutput[i];
+                cost += error * error;
+            }
+            return cost;
+        }
+        public void UpdateAllGradients(DataPoint dataPoint, bool printCost = false)
         {
             // Run input through network
-            Prediction(dataPoint.inputs);
+            double[] output = Prediction(dataPoint.inputs);
 
+            if (printCost)
+            {
+                 double cost = GetAverageCost(output, dataPoint.expectedOutputs);
+                 Console.WriteLine("Cost: " + cost);
+            }
             // Update output layer
             Layer outputLayer = this.layers[^1];
             double[] _ = outputLayer.CalcOuputNodeValues(dataPoint.expectedOutputs);
@@ -69,14 +83,15 @@ namespace NeuralNetwork_1
                 this.layers[i].ClearGradients();
             }
         }
-        public void Learn(DataPoint[] dataPoints, double learnRate)
+        public double Learn(DataPoint[] dataPoints, double learnRate)
         {
             for (int i = 0; i < dataPoints.Length; i++)
             {
-                UpdateAllGradients(dataPoints[i]);
+                UpdateAllGradients(dataPoints[i], i==-1);
             }
             ApplyAllGradients(learnRate / dataPoints.Length);
             ClearAllGradients();
+            return GetAverageCost(Prediction(dataPoints[0].inputs), dataPoints[0].expectedOutputs);
         }
     }
 }

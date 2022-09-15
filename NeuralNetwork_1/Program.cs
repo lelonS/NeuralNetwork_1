@@ -48,14 +48,24 @@ for (int i = 0; i < prediction.Length; i++)
 
 double lr = 0.2;
 Random rnd = new();
-for (int i = 0; i < 10000; i++)
+double cost = 10;
+int iter = 0;
+while (cost > 0.0001)
 {
-    DataPoint[] selection = new DataPoint[20];
+
+    iter++;
+    if (iter % 1000 == 0)
+    {
+        Console.WriteLine(cost + " " + iter);
+    }
+    /*
+    DataPoint[] selection = new DataPoint[100];
     for (int j = 0; j < selection.Length; j++)
     {
         selection[j] = dataPoints[rnd.Next(dataPoints.Length)];
     }
-    neuralNetwok.Learn(selection, lr);
+    */
+    cost = neuralNetwok.Learn(dataPoints, lr);
 }
 
 
