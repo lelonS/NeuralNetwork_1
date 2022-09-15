@@ -4,82 +4,166 @@
 using NeuralNetwork_1;
 
 
-int[] order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-
-DataPoint[] dataPoints = new DataPoint[10*10];
 
 
-// Generate DataPoints
-string[] orderStr = new string[order.Length];
-for (int i = 0; i < order.Length; i++)
+
+
+// TODO BATCH
+static void TrainNetwork(NeuralNetwork neuralNetwork, DataPoint[] trainingData, DataPoint[] testData, double learningRate, double targetCost, int batchSize = 0)
 {
-    string str = Convert.ToString(order[i], 2);
-    str = str.PadLeft(4, '0');
-    orderStr[i] = str;
-    Console.WriteLine(i + " " + str);
-}
-
-for (int k = 0; k < order.Length; k++)
-{
-    for (int i = 0; i < orderStr.Length; i++)
+    double cost = 100;
+    int iteration = 0;
+    DataPoint[] data = trainingData;
+    Random rnd = new();
+    Console.WriteLine("Start");
+    while (cost > targetCost)
     {
-        double[] input = new double[4];
-        for (int j = 0; j < 4; j++)
+        if (batchSize > 0)
         {
-            input[j] = double.Parse(orderStr[i][j].ToString());
+            data = new DataPoint[batchSize];
+            for (int i = 0; i < batchSize; i++)
+            {
+                data[i] = trainingData[rnd.Next(trainingData.Length)];
+            }
         }
-        double[] expectedOutput = new double[10];
-        expectedOutput[i] = 1;
-        DataPoint newDataPoint = new(input, expectedOutput);
-        Console.WriteLine(newDataPoint.ToString());
-        dataPoints[i+k*10] = newDataPoint;
+        cost = neuralNetwork.Learn(data, learningRate);
+
+        if (iteration % 1000 == 0)
+        {
+            Console.WriteLine("Training cost: " + iteration + " ::: " + cost);
+        }
+        iteration++;
+    }
+}
+
+void TestInputs(NeuralNetwork network)
+{
+    while (true)
+    {
+        Console.WriteLine();
+        double[] input = new double[network.amountInputs];
+        for (int i = 0; i < network.amountInputs; i++)
+        {
+            Console.Write("Input " + i + ": ");
+            input[i] = double.Parse(Console.ReadLine());
+            Console.WriteLine();
+        }
+        double[] prediction = network.Prediction(input);
+        for (int i = 0; i < prediction.Length; i++)
+        {
+            Console.WriteLine(i + " : " + prediction[i]);
+        }
     }
 }
 
 
-int[] layers = new int[] { 4, 4, 4, 10};
+
+
+
+
+int[] layers = new int[] { 16, 10, 12, 16, 24, 12, 10, 2 };
 NeuralNetwork neuralNetwok = new(layers);
-double[] prediction = neuralNetwok.Prediction(new double[] { 0, 0, 0, 0 });
-for (int i = 0; i < prediction.Length; i++)
-{
-    Console.WriteLine(i + " " + prediction[i]);
-}
-// Console.WriteLine(neuralNetwok.Prediction(new double[] { 1,1,1,1 })[0]);
+DataPoint[] trainingData = new DataPoint[10000];
 
-double lr = 0.2;
-Random rnd = new();
-double cost = 10;
-int iter = 0;
-while (cost > 0.0001)
+for (int i = 0; i < trainingData.Length; i++)
 {
-
-    iter++;
-    if (iter % 1000 == 0)
+    string str = Convert.ToString(i, 2);
+    str = str.PadLeft(16, '0');
+    double[] inputs = new double[16];
+    for (int j = 0; j < 16; j++)
     {
-        Console.WriteLine(cost + " " + iter);
+        inputs[j] = double.Parse(str[j].ToString());
     }
-    /*
-    DataPoint[] selection = new DataPoint[100];
-    for (int j = 0; j < selection.Length; j++)
+    double[] outputs = new double[] { 0, 1 };
+    if (i % 3 == 0)
     {
-        selection[j] = dataPoints[rnd.Next(dataPoints.Length)];
+        outputs = new double[] { 1, 0 };
     }
-    */
-    cost = neuralNetwok.Learn(dataPoints, lr);
+
+
+    trainingData[i] = new DataPoint(inputs, outputs);
 }
 
+TrainNetwork(neuralNetwok, trainingData, trainingData, 0.2, 0.0001, 200);
+TestInputs(neuralNetwok);
 
-Console.WriteLine();
-prediction = neuralNetwok.Prediction(new double[] { 0, 0, 0, 0 });
-for (int i = 0; i < prediction.Length; i++)
-{
-    Console.WriteLine(i + " " + prediction[i]);
-}
 
-Console.WriteLine();
+//int[] order = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-prediction = neuralNetwok.Prediction(new double[] { 0, 0, 1, 0 });
-for (int i = 0; i < prediction.Length; i++)
-{
-    Console.WriteLine(i + " " + prediction[i]);
-}
+//DataPoint[] dataPoints = new DataPoint[10*10];
+
+
+//// Generate DataPoints
+//string[] orderStr = new string[order.Length];
+//for (int i = 0; i < order.Length; i++)
+//{
+//    string str = Convert.ToString(order[i], 2);
+//    str = str.PadLeft(4, '0');
+//    orderStr[i] = str;
+//    Console.WriteLine(i + " " + str);
+//}
+
+//for (int k = 0; k < order.Length; k++)
+//{
+//    for (int i = 0; i < orderStr.Length; i++)
+//    {
+//        double[] input = new double[4];
+//        for (int j = 0; j < 4; j++)
+//        {
+//            input[j] = double.Parse(orderStr[i][j].ToString());
+//        }
+//        double[] expectedOutput = new double[10];
+//        expectedOutput[i] = 1;
+//        DataPoint newDataPoint = new(input, expectedOutput);
+//        Console.WriteLine(newDataPoint.ToString());
+//        dataPoints[i+k*10] = newDataPoint;
+//    }
+//}
+
+
+//int[] layers = new int[] { 4, 4, 4, 10};
+//NeuralNetwork neuralNetwok = new(layers);
+//double[] prediction = neuralNetwok.Prediction(new double[] { 0, 0, 0, 0 });
+//for (int i = 0; i < prediction.Length; i++)
+//{
+//    Console.WriteLine(i + " " + prediction[i]);
+//}
+//// Console.WriteLine(neuralNetwok.Prediction(new double[] { 1,1,1,1 })[0]);
+
+//double lr = 0.2;
+//Random rnd = new();
+//double cost = 10;
+//int iter = 0;
+//while (cost > 0.0001)
+//{
+
+//    iter++;
+//    if (iter % 1000 == 0)
+//    {
+//        Console.WriteLine(cost + " " + iter);
+//    }
+//    /*
+//    DataPoint[] selection = new DataPoint[100];
+//    for (int j = 0; j < selection.Length; j++)
+//    {
+//        selection[j] = dataPoints[rnd.Next(dataPoints.Length)];
+//    }
+//    */
+//    cost = neuralNetwok.Learn(dataPoints, lr);
+//}
+
+
+//Console.WriteLine();
+//prediction = neuralNetwok.Prediction(new double[] { 0, 0, 0, 0 });
+//for (int i = 0; i < prediction.Length; i++)
+//{
+//    Console.WriteLine(i + " " + prediction[i]);
+//}
+
+//Console.WriteLine();
+
+//prediction = neuralNetwok.Prediction(new double[] { 0, 0, 1, 0 });
+//for (int i = 0; i < prediction.Length; i++)
+//{
+//    Console.WriteLine(i + " " + prediction[i]);
+//}

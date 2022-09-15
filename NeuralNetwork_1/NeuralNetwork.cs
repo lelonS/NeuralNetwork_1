@@ -44,7 +44,7 @@ namespace NeuralNetwork_1
                 double error = output[i] - expectedOutput[i];
                 cost += error * error;
             }
-            return cost;
+            return cost / output.Length;
         }
         public void UpdateAllGradients(DataPoint dataPoint, bool printCost = false)
         {
