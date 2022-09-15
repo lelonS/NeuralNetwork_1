@@ -35,5 +35,48 @@ namespace NeuralNetwork_1
             }
             return layer_output;
         }
+
+
+        public void UpdateAllGradients(DataPoint dataPoint)
+        {
+            // Run input through network
+            Prediction(dataPoint.inputs);
+
+            // Update output layer
+            Layer outputLayer = this.layers[^1];
+            double[] _ = outputLayer.CalcOuputNodeValues(dataPoint.expectedOutputs);
+            outputLayer.UpdateGradients();
+
+            for (int i = this.layers.Length - 2; i >= 0; i--)
+            {
+                Layer hiddenLayer = this.layers[i];
+                _ = hiddenLayer.CalcHiddenNodeValues(this.layers[i + 1]);
+                hiddenLayer.UpdateGradients();
+            }
+        }
+
+        public void ApplyAllGradients(double learnRate)
+        {
+            for (int i = 0; i < this.layers.Length; i++)
+            {
+                this.layers[i].ApplyGradients(learnRate);
+            }
+        }
+        public void ClearAllGradients()
+        {
+            for (int i = 0; i < this.layers.Length; i++)
+            {
+                this.layers[i].ClearGradients();
+            }
+        }
+        public void Learn(DataPoint[] dataPoints, double learnRate)
+        {
+            for (int i = 0; i < dataPoints.Length; i++)
+            {
+                UpdateAllGradients(dataPoints[i]);
+            }
+            ApplyAllGradients(learnRate / dataPoints.Length);
+            ClearAllGradients();
+        }
     }
 }
