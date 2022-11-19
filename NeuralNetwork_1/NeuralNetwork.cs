@@ -44,9 +44,9 @@ namespace NeuralNetwork_1
                 double error = output[i] - expectedOutput[i];
                 cost += error * error;
             }
-            return cost / output.Length;
+            return cost / 1;
         }
-        public void UpdateAllGradients(DataPoint dataPoint, bool printCost = false)
+        public double UpdateAllGradients(DataPoint dataPoint, bool printCost = false)
         {
             // Run input through network
             double[] output = Prediction(dataPoint.inputs);
@@ -67,6 +67,7 @@ namespace NeuralNetwork_1
                 _ = hiddenLayer.CalcHiddenNodeValues(this.layers[i + 1]);
                 hiddenLayer.UpdateGradients();
             }
+            return GetAverageCost(output, dataPoint.expectedOutputs);
         }
 
         public void ApplyAllGradients(double learnRate)
@@ -85,13 +86,15 @@ namespace NeuralNetwork_1
         }
         public double Learn(DataPoint[] dataPoints, double learnRate)
         {
+            double total_cost = 0;
             for (int i = 0; i < dataPoints.Length; i++)
             {
-                UpdateAllGradients(dataPoints[i], i==-1);
+                total_cost += UpdateAllGradients(dataPoints[i], i==-1);
             }
             ApplyAllGradients(learnRate / dataPoints.Length);
             ClearAllGradients();
-            return GetAverageCost(Prediction(dataPoints[0].inputs), dataPoints[0].expectedOutputs);
+            // Console.WriteLine(dataPoints[0].ToString(), Prediction(dataPoints[0].inputs));
+            return total_cost / dataPoints.Length;
         }
     }
 }

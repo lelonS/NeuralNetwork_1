@@ -61,30 +61,48 @@ void TestInputs(NeuralNetwork network)
 
 
 
-int[] layers = new int[] { 16, 10, 12, 16, 24, 12, 10, 2 };
+int[] layers = new int[] { 64, 64 };
 NeuralNetwork neuralNetwok = new(layers);
 DataPoint[] trainingData = new DataPoint[10000];
 
+Random rnd = new Random(1);
+
+string[] seq = new string[trainingData.Length + 1];
+for (int i = 0; i < seq.Length; i++)
+{
+    double r = rnd.NextDouble();
+    byte[] t = BitConverter.GetBytes(r);
+    string s = "";
+    for(int j = 0; j < t.Length; j++)
+    {
+        s += Convert.ToString(t[j], 2).PadLeft(8, '0');
+    }
+    seq[i] = s;
+    //Console.WriteLine(seq[i]);
+}
+Console.WriteLine(seq[0] + " " + seq[0].Length + " ");
+Console.WriteLine(seq[1] + " " + seq[1].Length + " ");
+Console.WriteLine(seq[2] + " " + seq[2].Length + " ");
+
+
 for (int i = 0; i < trainingData.Length; i++)
 {
-    string str = Convert.ToString(i, 2);
-    str = str.PadLeft(16, '0');
-    double[] inputs = new double[16];
-    for (int j = 0; j < 16; j++)
-    {
-        inputs[j] = double.Parse(str[j].ToString());
-    }
-    double[] outputs = new double[] { 0, 1 };
-    if (i % 3 == 0)
-    {
-        outputs = new double[] { 1, 0 };
-    }
+    double[] inputs = new double[64];
 
+    double[] outputs = new double[64];
+
+    for (int j = 0; j < 64; j++)
+    {
+        // Console.WriteLine(seq[i].Length);
+        inputs[j] = double.Parse(seq[i][j].ToString());
+        outputs[j] = double.Parse(seq[i][j].ToString());
+    }
 
     trainingData[i] = new DataPoint(inputs, outputs);
 }
 
-TrainNetwork(neuralNetwok, trainingData, trainingData, 0.2, 0.0001, 200);
+Console.WriteLine(trainingData[0].inputs[0].ToString() + " " + seq[0]);
+TrainNetwork(neuralNetwok, trainingData, trainingData, 0.01, 0.001, 20);
 TestInputs(neuralNetwok);
 
 
